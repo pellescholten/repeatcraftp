@@ -1,6 +1,7 @@
 import sys
 import subprocess
 from collections import defaultdict
+import re
 
 nested_dict = lambda: defaultdict(nested_dict)
 
@@ -70,7 +71,8 @@ def fusete(gffp,outfile,gapsize=150):
 			dcnt += 1
 			sys.stderr.write("\rProgress:" + str(dcnt) + "/" + totalline + "...")
 
-			if (int(col[3]) - P["pEnd"] > gapSize) or (col[0] != P["pchrom"]): # Also make sure they are in different chrom
+			# Also make sure they are not on different chrom, and neither the current or previous TE is labelled as short
+			if (int(col[3]) - P["pEnd"] > gapSize) or (col[0] != P["pchrom"]) or re.search(r"shortTE=T",col[8]) or re.search(r"shortTE=T", str(P["pcol"])): 
 				if P["pcol"]:  # Make sure not the first line
 					print(*P["pcol"], sep="\t")  # print last row
 				update_pcol(c=col, label="")

@@ -53,7 +53,7 @@ def fuseltr(rmgff,ltrgff_p,ltr_maxlength,ltr_flank,outfile):
 				print(*col, sep="\t")
 				continue
 			# skip short sequence
-			if re.search(r"shortTE:T",col[8]):
+			if re.search(r"shortTE=T",col[8]):
 				print(*col,sep="\t")
 				continue
 
