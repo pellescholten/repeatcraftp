@@ -20,7 +20,7 @@ def reformat(rmgff,rmout,outfile):
 	with open(rmgff, "r") as f:
 		for line in f:
 			if line.startswith("#"):  # skip header
-				next(f)
+				continue
 			else:
 				[seqid, source, T, start, end, score, strand, phase, remark] = line.rstrip().split("\t")
 				if re.search(".*Motif:.*",line):
