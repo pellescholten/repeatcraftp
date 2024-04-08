@@ -55,13 +55,18 @@ def filtershortTE(rmgff,m,tesize,mapfile,outfile):
 		for line in f:
 			col = line.rstrip().split("\t")
 			generalClass = col[2].split("/")[0]
+			# Loop through classes to make sure the most precise class identification is used
+			generalClasses = col[2].split("/")
+			for potentialClass in generalClasses:
+				if potentialClass in m:
+					generalClass = potentialClass 
 			teSize = int(col[4]) - int(col[3])
 			try:
 				m[generalClass]
 			except KeyError:
 				m[generalClass] = 0
 				sys.stderr.write("'" + generalClass + "' is not in the mapfile. Skip filtering " + generalClass)
-			if teSize < m[generalClass]:
+			if teSize < m[generalClass] or m[generalClass] == 0:
 				col[8] =  col[8] + ";shortTE=T"
 			else:
 				col[8] = col[8] + ";shortTE=F"
@@ -69,7 +74,4 @@ def filtershortTE(rmgff,m,tesize,mapfile,outfile):
 
 	sys.stdout.close()
 	sys.stdout = stdout
-
-
-
 
