@@ -144,13 +144,17 @@ try:
 			                ltr_flank=param["ltrflanksize"], outfile="tmp03.gff")
 			sys.stderr.write("Step 4: Labelling TE groups...(loose mode)\n")
 			extraFuseTEm.truefusete(gffp="tmp03.gff",outfile=outputnamelabel_tobesort,gapsize=param["tegap"])
-			c = "sort -k1,1 -k4,4n -k5,5n " + outputnamelabel_tobesort + " >" + outputnamelabel
+			c = "grep '#' " + outputnamelabel_tobesort + " > " + outputnamelabel
+			subprocess.run(c, shell=True)
+			c = "grep -v '#' " + outputnamelabel_tobesort + " | sort -k1,1 -k4,4n -k5,5n >>" + outputnamelabel
 			subprocess.run(c, shell=True)
 		else:
 			sys.stderr.write("Missing LTR_FINDER GFF, skip adding LTRgroup attribute label.\n")
 			sys.stderr.write("Step 4: Labelling TE groups...(loose mode)\n")
 			extraFuseTEm.truefusete(gffp="tmp02.gff", outfile=outputnamelabel_tobesort, gapsize=param["tegap"])
-			c = "sort -k1,1 -k4,4n -k5,5n " + outputnamelabel_tobesort + " >" + outputnamelabel
+			c = "grep '#' " + outputnamelabel_tobesort + " > " + outputnamelabel
+			subprocess.run(c, shell=True)
+			c = "grep -v '#' " + outputnamelabel_tobesort + " | sort -k1,1 -k4,4n -k5,5n >>" + outputnamelabel
 			subprocess.run(c, shell=True)
 
 
@@ -165,7 +169,9 @@ try:
 			truemergetem.truemergete(rmgff="ltrmerge.tmp.gff", outfile=strictoutputnamemerge)
 		else:
 			extraTrueMergeTEm.extratruemergete(gffp="ltrmerge.tmp.gff",outfile=outputnamemerge_tobesort )
-			c = "sort -k1,1 -k4,4n -k5,5n " + outputnamemerge_tobesort + " >" +outputnamemerge
+			c = "grep '#' " + outputnamemerge_tobesort + " > " + outputnamemerge
+			subprocess.run(c, shell=True)
+			c = "grep -v '#' " + outputnamemerge_tobesort + " | sort -k1,1 -k4,4n -k5,5n >> " + outputnamemerge
 			subprocess.run(c, shell=True)
 
 	else:
@@ -173,7 +179,9 @@ try:
 			truemergetem.truemergete(rmgff=outputnamelabel, outfile=strictoutputnamemerge)
 		else:
 			extraTrueMergeTEm.extratruemergete(gffp=outputnamelabel, outfile=outputnamemerge_tobesort )
-			c = "sort -k1,1 -k4,4n -k5,5n " + outputnamemerge_tobesort + " >" + outputnamemerge
+			c = "grep '#' " + outputnamemerge_tobesort + " > " + outputnamemerge
+			subprocess.run(c, shell=True)
+			c = "grep -v '#' " + outputnamemerge_tobesort + " | sort -k1,1 -k4,4n -k5,5n >> " + outputnamemerge
 			subprocess.run(c, shell=True)
 
 
