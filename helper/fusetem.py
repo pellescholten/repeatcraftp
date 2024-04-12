@@ -5,7 +5,7 @@ import re
 
 nested_dict = lambda: defaultdict(nested_dict)
 
-def fusete(gffp,outfile,gapsize=150):
+def fusete(gffp,outfile,gapsize=150,mergeShort=False):
 
 	gff = gffp
 	gapSize = gapsize
@@ -72,7 +72,7 @@ def fusete(gffp,outfile,gapsize=150):
 			sys.stderr.write("\rProgress:" + str(dcnt) + "/" + totalline + "...")
 
 			# Also make sure they are not on different chrom, and neither the current or previous TE is labelled as short
-			if (int(col[3]) - P["pEnd"] > gapSize) or (col[0] != P["pchrom"]) or re.search(r"shortTE=T",col[8]) or re.search(r"shortTE=T", str(P["pcol"])): 
+			if (int(col[3]) - P["pEnd"] > gapSize) or (col[0] != P["pchrom"]) or ((re.search(r"shortTE=T",col[8]) or re.search(r"shortTE=T", str(P["pcol"]))) and not mergeShort): 
 				if P["pcol"]:  # Make sure not the first line
 					print(*P["pcol"], sep="\t")  # print last row
 				update_pcol(c=col, label="")

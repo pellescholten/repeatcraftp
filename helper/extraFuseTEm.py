@@ -1,10 +1,11 @@
 import subprocess
 import sys
+import re
 
 from collections import defaultdict
 nested_dict = lambda: defaultdict(nested_dict)
 
-def truefusete(gffp,gapsize,outfile):
+def truefusete(gffp,gapsize,outfile,mergeShort=False):
 
 	gff = gffp
 
@@ -53,12 +54,11 @@ def truefusete(gffp,gapsize,outfile):
 						print(*d[lastchrom][family]["lastcol"],sep="\t")
 
 			lastchrom = col[0] # Update lastcol
-
 			if d[col[0]][cattrD["ID"]]:  # not the first family on this chrom
 				#print("not first family") # debug
-				if (int(col[3]) - d[col[0]][cattrD["ID"]]["lastend"]) > gapsize or col[0] != d[col[0]][cattrD["ID"]]["lastcol"][
-					0]:
+				if (int(col[3]) - d[col[0]][cattrD["ID"]]["lastend"]) > gapsize or col[0] != d[col[0]][cattrD["ID"]]["lastcol"][0] or ((re.search(r"shortTE=T",col[8]) or re.search(r"shortTE=T", d[col[0]][cattrD["ID"]]["lastcol"][8])) and not mergeShort):
 					#print("larger than 150") # debug
+					# or classified as shortTE=T
 					# don't need to group the two records
 					# print the lastest record of the lastest family group without adding new label
 					col2print = d[col[0]][cattrD["ID"]]["lastcol"]

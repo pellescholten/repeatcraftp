@@ -29,7 +29,9 @@ parser.add_argument("-o", "--output", help="Output file name", default="repeatcr
 parser.add_argument("-m", "--mode",
                     help="Merge mode. strict or loose. Default = loose",
                     default="loose", type=str)
+parser.add_argument("-s", "--shortRepeats", help="Merge short repeats. Default = False", action='store_true')
 parser.add_argument("-d", "--debug",  action="store_true",help="Debug mode. Keep all temporary files.")
+
 
 args = parser.parse_args()
 
@@ -54,6 +56,7 @@ rmoutp = args.rmout
 configp = args.config
 outputname = args.output
 mergemode = args.mode
+shortRepeats = args.shortRepeats
 
 param = {
 	"shortTEsize": 0,
@@ -130,11 +133,15 @@ try:
 			sys.stderr.write("Step 3: Labelling LTR groups...\n")
 			fuseltr.fuseltr(rmgff="tmp02.gff", ltrgff_p=param["ltrgff"], ltr_maxlength=param["maxltrsize"],ltr_flank=param["ltrflanksize"], outfile="tmp03.gff")
 			sys.stderr.write("Step 4: Labelling TE groups...(strict mode)\n")
-			fusetem.fusete(gffp="tmp03.gff", outfile=outputnamelabel, gapsize=param["tegap"])
+			if shortRepeats == False:
+				sys.stderr.write("Not merging short repeats ...\n")
+			fusetem.fusete(gffp="tmp03.gff", outfile=outputnamelabel, gapsize=param["tegap"], mergeShort=shortRepeats)
 		else:
 			sys.stderr.write("Missing LTR_FINDER GFF, skip adding LTRgroup attribute label.\n")
 			sys.stderr.write("Step 4: Labelling TE groups...(strict mode)\n")
-			fusetem.fusete(gffp="tmp02.gff", outfile=outputnamelabel, gapsize=param["tegap"])
+			if shortRepeats == False:
+				sys.stderr.write("Not merging short repeats ...\n")
+			fusetem.fusete(gffp="tmp02.gff", outfile=outputnamelabel, gapsize=param["tegap"], mergeShort=shortRepeats)
 	else:
 		outputnamelabel = outputname + ".rclabel.gff"
 		outputnamelabel_tobesort = outputname + ".rclabel.gff.tmp"
@@ -143,7 +150,9 @@ try:
 			fuseltr.fuseltr(rmgff="tmp02.gff", ltrgff_p=param["ltrgff"], ltr_maxlength=param["maxltrsize"],
 			                ltr_flank=param["ltrflanksize"], outfile="tmp03.gff")
 			sys.stderr.write("Step 4: Labelling TE groups...(loose mode)\n")
-			extraFuseTEm.truefusete(gffp="tmp03.gff",outfile=outputnamelabel_tobesort,gapsize=param["tegap"])
+			if shortRepeats == False:
+				sys.stderr.write("Not merging short repeats ...\n")
+			extraFuseTEm.truefusete(gffp="tmp03.gff",outfile=outputnamelabel_tobesort,gapsize=param["tegap"], mergeShort=shortRepeats)
 			c = "grep '#' " + outputnamelabel_tobesort + " > " + outputnamelabel
 			subprocess.run(c, shell=True)
 			c = "grep -v '#' " + outputnamelabel_tobesort + " | sort -k1,1 -k4,4n -k5,5n >>" + outputnamelabel
@@ -151,7 +160,9 @@ try:
 		else:
 			sys.stderr.write("Missing LTR_FINDER GFF, skip adding LTRgroup attribute label.\n")
 			sys.stderr.write("Step 4: Labelling TE groups...(loose mode)\n")
-			extraFuseTEm.truefusete(gffp="tmp02.gff", outfile=outputnamelabel_tobesort, gapsize=param["tegap"])
+			if shortRepeats == False:
+				sys.stderr.write("Not merging short repeats ...\n")
+			extraFuseTEm.truefusete(gffp="tmp02.gff", outfile=outputnamelabel_tobesort, gapsize=param["tegap"], mergeShort=shortRepeats)
 			c = "grep '#' " + outputnamelabel_tobesort + " > " + outputnamelabel
 			subprocess.run(c, shell=True)
 			c = "grep -v '#' " + outputnamelabel_tobesort + " | sort -k1,1 -k4,4n -k5,5n >>" + outputnamelabel
@@ -159,7 +170,7 @@ try:
 
 
 	# True merge
-	sys.stderr.write("Step 5: Merging GFF records by labels...\n")
+	sys.stderr.write("\nStep 5: Merging GFF records by labels...\n")
 	strictoutputnamemerge = outputname + ".rmerge.gff"
 	outputnamemerge = outputname + ".rmerge.gff"
 	outputnamemerge_tobesort = outputname + ".rmerge.gff.tmp"
