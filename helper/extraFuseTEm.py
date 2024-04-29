@@ -1,17 +1,16 @@
 import subprocess
 import sys
-import re
 
 from collections import defaultdict
 nested_dict = lambda: defaultdict(nested_dict)
 
-def truefusete(gffp,gapsize,outfile,mergeShort=False):
+def truefusete(gffp,gapsize,outfile):
 
 	gff = gffp
 
 	# print track
 	stdout = sys.stdout
-	sys.stdout = open(outfile, 'w')
+	#sys.stdout = open(outfile, 'w')
 
 	# quick check number of line of the file
 	sh = subprocess.run(['wc', '-l',gff], stdout=subprocess.PIPE)
@@ -54,11 +53,15 @@ def truefusete(gffp,gapsize,outfile,mergeShort=False):
 						print(*d[lastchrom][family]["lastcol"],sep="\t")
 
 			lastchrom = col[0] # Update lastcol
+
+
 			if d[col[0]][cattrD["ID"]]:  # not the first family on this chrom
 				#print("not first family") # debug
-				if (int(col[3]) - d[col[0]][cattrD["ID"]]["lastend"]) > gapsize or col[0] != d[col[0]][cattrD["ID"]]["lastcol"][0] or ((re.search(r"shortTE=T",col[8]) or re.search(r"shortTE=T", d[col[0]][cattrD["ID"]]["lastcol"][8])) and not mergeShort):
-					#print("larger than 150") # debug
-					# or classified as shortTE=T
+				#point()
+				if (int(col[3]) - d[col[0]][cattrD["ID"]]["lastend"]) > gapsize or col[0] != d[col[0]][cattrD["ID"]]["lastcol"][
+					0]:
+					print("larger than 150") # debug
+					#breakpoint()
 					# don't need to group the two records
 					# print the lastest record of the lastest family group without adding new label
 					col2print = d[col[0]][cattrD["ID"]]["lastcol"]
@@ -88,7 +91,7 @@ def truefusete(gffp,gapsize,outfile,mergeShort=False):
 							d[col[0]][cattrD["ID"]]["lastend"] = int(col[4])
 							d[col[0]][cattrD["ID"]]["Tstart"] = cattrD["Tstart"]
 							d[col[0]][cattrD["ID"]]["Tend"] = cattrD["Tend"]
-							d[col[0]][cattrD["ID"]]["lastTElabel"] = True
+							d[col[0]][cattrD["ID"]]["lastTElabel"] = False #????
 						else:
 							#print("consensus pass") # debug
 							# print the lastcol directly
@@ -109,7 +112,12 @@ def truefusete(gffp,gapsize,outfile,mergeShort=False):
 
 					else: # the lastcol is the first element is this group, just need to check if last and current copies overlap
 						#print("last copy no label") # debug
-						o = min(d[col[0]][cattrD["ID"]]["Tend"], cattrD["Tstart"]) - max(d[col[0]][cattrD["ID"]]["Tstart"], cattrD["Tend"])
+
+						if d[col[0]][cattrD["ID"]]["Tstart"] >= cattrD["Tstart"]:
+							o = cattrD["Tend"] - d[col[0]][cattrD["ID"]]["Tstart"]
+						else:
+							o = d[col[0]][cattrD["ID"]]["Tend"] - cattrD["Tstart"]
+						#o = min(d[col[0]][cattrD["ID"]]["Tend"], cattrD["Tstart"]) - max(d[col[0]][cattrD["ID"]]["Tstart"], cattrD["Tend"])
 						if o > 0:  # Consensus position overlap, don't need to group them just print
 							#print("consensus overlap") # debug
 							print(*d[col[0]][cattrD["ID"]]["lastcol"], sep="\t")
@@ -117,7 +125,7 @@ def truefusete(gffp,gapsize,outfile,mergeShort=False):
 							d[col[0]][cattrD["ID"]]["lastend"] = int(col[4])
 							d[col[0]][cattrD["ID"]]["Tstart"] = cattrD["Tstart"]
 							d[col[0]][cattrD["ID"]]["Tend"] = cattrD["Tend"]
-							d[col[0]][cattrD["ID"]]["lastTElabel"] = True
+							d[col[0]][cattrD["ID"]]["lastTElabel"] = False
 
 						else: # can open a new group now and update the attr of the last and current copies
 							#print("consensus pass") # debug
